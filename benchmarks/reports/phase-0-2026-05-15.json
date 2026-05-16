@@ -1,0 +1,17 @@
+{
+  "label": "phase-0.in-process.json-roundtrip",
+  "ts": "2026-05-15T21:34:40.737Z",
+  "iters": 1000,
+  "p50_ms": 0.002,
+  "p90_ms": 0.002,
+  "p99_ms": 0.004,
+  "max_ms": 0.026,
+  "errors": 0,
+  "host": {
+    "hostname": "ip-10-0-40-14.ec2.internal",
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+    "cpu_count": 2,
+    "ram_gb": 8,
+    "node": "v22.19.0"
+  }
+}

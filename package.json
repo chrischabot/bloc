@@ -1,0 +1,45 @@
+{
+  "name": "bloc",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.18.1",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "test:visual": "turbo run test:visual",
+    "test:chaos": "turbo run test:chaos",
+    "test:sdk": "turbo run test:sdk",
+    "test:obs": "turbo run test:obs",
+    "bench": "node tools/benchmark/cli.mjs",
+    "bench:sweep": "node tools/benchmark/sweep.mjs",
+    "bench:phase-1": "tsx tools/benchmark/scenarios/phase-1-db.ts",
+    "bench:phase-2": "tsx tools/benchmark/scenarios/phase-2-blocks.ts",
+    "bench:phase-3": "tsx tools/benchmark/scenarios/phase-3-pages.ts",
+    "bench:phase-4": "tsx tools/benchmark/scenarios/phase-4-databases.ts",
+    "bench:phase-5": "tsx tools/benchmark/scenarios/phase-5-search.ts",
+    "bench:phase-22": "tsx tools/benchmark/scenarios/phase-22-reminders-versions.ts",
+    "db:migrate": "turbo run db:migrate --filter=@bloc/db",
+    "db:reset": "turbo run db:reset --filter=@bloc/db",
+    "db:seed": "turbo run db:seed --filter=@bloc/db",
+    "links:check": "node tools/scripts/check-links.mjs",
+    "clean": "turbo run clean && rimraf node_modules .turbo"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "22.10.5",
+    "rimraf": "6.0.1",
+    "tsx": "4.19.2",
+    "turbo": "2.3.3",
+    "typescript": "5.6.3"
+  }
+}

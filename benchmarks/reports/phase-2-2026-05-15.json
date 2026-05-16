@@ -1,0 +1,19 @@
+{
+  "label": "phase-2.blocks.children.append-100",
+  "ts": "2026-05-15T22:50:39.240Z",
+  "iters": 50,
+  "p50_ms": 59.511,
+  "p90_ms": 75.939,
+  "p99_ms": 104.718,
+  "max_ms": 104.718,
+  "errors": 0,
+  "budget_p99_ms": 250,
+  "passed": true,
+  "host": {
+    "hostname": "ip-10-0-40-14.ec2.internal",
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+    "cpu_count": 2,
+    "ram_gb": 8,
+    "node": "v22.19.0"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@bloc/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts",
+    "./client": "./src/client.ts",
+    "./fractional-index": "./src/fractional-index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:migrate": "node --experimental-strip-types scripts/migrate.ts",
+    "db:reset": "node --experimental-strip-types scripts/reset.ts",
+    "db:seed": "node --experimental-strip-types scripts/seed.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.4.5",
+    "@bloc/shared": "workspace:*",
+    "bcryptjs": "2.4.3",
+    "drizzle-orm": "0.36.4",
+    "postgres": "3.4.5"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "2.4.6",
+    "@types/node": "22.10.5",
+    "drizzle-kit": "0.28.1",
+    "typescript": "5.6.3",
+    "vitest": "2.1.8"
+  }
+}

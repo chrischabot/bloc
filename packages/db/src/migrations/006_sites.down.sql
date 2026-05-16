@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS publications CASCADE;
+DROP TABLE IF EXISTS custom_domains CASCADE;

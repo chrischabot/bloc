@@ -1,0 +1,20 @@
+{
+  "name": "@bloc/tests-sdk-progressive",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:sdk": "vitest run"
+  },
+  "dependencies": {
+    "@bloc/api": "workspace:*",
+    "@bloc/db": "workspace:*",
+    "@bloc/sdk": "workspace:*",
+    "@bloc/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "2.1.8"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "label": "phase-22.reminders+versions",
+  "ts": "2026-05-16T11:26:26.047Z",
+  "host": {
+    "hostname": "ip-10-0-40-14.ec2.internal",
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+    "cpu_count": 2,
+    "ram_gb": 8,
+    "node": "v22.19.0"
+  },
+  "scenarios": [
+    {
+      "label": "reminders.list-50",
+      "iters": 50,
+      "p50_ms": 4.084,
+      "p99_ms": 12.736,
+      "budget_p99_ms": 150,
+      "passed": true
+    },
+    {
+      "label": "reminders.create",
+      "iters": 50,
+      "p50_ms": 3.177,
+      "p99_ms": 13.239,
+      "budget_p99_ms": 150,
+      "passed": true
+    },
+    {
+      "label": "versions.list-25",
+      "iters": 50,
+      "p50_ms": 4.686,
+      "p99_ms": 16.306,
+      "budget_p99_ms": 150,
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "label": "phase-5.search.empty-query-50pages",
+  "ts": "2026-05-16T11:26:18.926Z",
+  "iters": 50,
+  "p50_ms": 57.991,
+  "p90_ms": 74.997,
+  "p99_ms": 101.655,
+  "max_ms": 101.655,
+  "errors": 0,
+  "budget_p99_ms": 200,
+  "passed": true,
+  "host": {
+    "hostname": "ip-10-0-40-14.ec2.internal",
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+    "cpu_count": 2,
+    "ram_gb": 8,
+    "node": "v22.19.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@bloc/benchmark",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@bloc/api": "workspace:*",
+    "@bloc/db": "workspace:*",
+    "@bloc/shared": "workspace:*"
+  }
+}

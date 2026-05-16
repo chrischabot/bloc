@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+out/
+*.tsbuildinfo
+
+# Turbo
+.turbo/
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+/tests/**/__snapshots__/*.actual.png
+/tests/**/__snapshots__/*.diff.png
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Benchmarks (keep reports tracked; ignore raw histograms)
+benchmarks/raw/
+benchmarks/*.tmp
+
+# Local data
+data/
+tmp/
+*.sqlite
+*.sqlite-journal
+
+# Maestro internal
+.maestro/
+
+# Internal prompts / pastes
+paste_*.txt
+
+# Notion-copyrighted reference screenshots (local-only, used by visual tests)
+/screenshots/
+/reference/screenshots/

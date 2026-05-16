@@ -1,0 +1,146 @@
+{
+  "label": "full-suite-2026-05-16",
+  "ts": "2026-05-16T11:26:26.118Z",
+  "host": {
+    "hostname": "ip-10-0-40-14.ec2.internal",
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+    "cpu_count": 2,
+    "ram_gb": 8,
+    "node": "v22.19.0"
+  },
+  "summary": {
+    "scenarios": 8,
+    "passed": 8,
+    "failed": 0,
+    "errored": 0
+  },
+  "results": [
+    {
+      "phase": 1,
+      "label": "phase-1.db.listChildren-100",
+      "ts": "2026-05-16T11:25:35.226Z",
+      "iters": 200,
+      "p50_ms": 5.11,
+      "p90_ms": 8.628,
+      "p99_ms": 12.092,
+      "max_ms": 21.198,
+      "errors": 0,
+      "budget_p99_ms": 80,
+      "passed": true,
+      "host": {
+        "hostname": "ip-10-0-40-14.ec2.internal",
+        "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+        "cpu_count": 2,
+        "ram_gb": 8,
+        "node": "v22.19.0"
+      }
+    },
+    {
+      "phase": 2,
+      "label": "phase-2.blocks.children.append-100",
+      "ts": "2026-05-16T11:25:48.966Z",
+      "iters": 50,
+      "p50_ms": 143.173,
+      "p90_ms": 194.423,
+      "p99_ms": 206.147,
+      "max_ms": 206.147,
+      "errors": 0,
+      "budget_p99_ms": 250,
+      "passed": true,
+      "host": {
+        "hostname": "ip-10-0-40-14.ec2.internal",
+        "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+        "cpu_count": 2,
+        "ram_gb": 8,
+        "node": "v22.19.0"
+      }
+    },
+    {
+      "phase": 3,
+      "label": "phase-3.pages.create-no-children",
+      "ts": "2026-05-16T11:25:56.570Z",
+      "iters": 100,
+      "p50_ms": 11.148,
+      "p90_ms": 16.016,
+      "p99_ms": 21.778,
+      "max_ms": 31.045,
+      "errors": 0,
+      "budget_p99_ms": 150,
+      "passed": true,
+      "host": {
+        "hostname": "ip-10-0-40-14.ec2.internal",
+        "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+        "cpu_count": 2,
+        "ram_gb": 8,
+        "node": "v22.19.0"
+      }
+    },
+    {
+      "phase": 4,
+      "label": "phase-4.databases.query-100rows-2clause",
+      "ts": "2026-05-16T11:26:08.494Z",
+      "iters": 50,
+      "p50_ms": 56.844,
+      "p90_ms": 66.001,
+      "p99_ms": 78.759,
+      "max_ms": 78.759,
+      "errors": 0,
+      "budget_p99_ms": 250,
+      "passed": true,
+      "host": {
+        "hostname": "ip-10-0-40-14.ec2.internal",
+        "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+        "cpu_count": 2,
+        "ram_gb": 8,
+        "node": "v22.19.0"
+      }
+    },
+    {
+      "phase": 5,
+      "label": "phase-5.search.empty-query-50pages",
+      "ts": "2026-05-16T11:26:18.926Z",
+      "iters": 50,
+      "p50_ms": 57.991,
+      "p90_ms": 74.997,
+      "p99_ms": 101.655,
+      "max_ms": 101.655,
+      "errors": 0,
+      "budget_p99_ms": 200,
+      "passed": true,
+      "host": {
+        "hostname": "ip-10-0-40-14.ec2.internal",
+        "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+        "cpu_count": 2,
+        "ram_gb": 8,
+        "node": "v22.19.0"
+      }
+    },
+    {
+      "phase": 22,
+      "label": "reminders.list-50",
+      "iters": 50,
+      "p50_ms": 4.084,
+      "p99_ms": 12.736,
+      "budget_p99_ms": 150,
+      "passed": true
+    },
+    {
+      "phase": 22,
+      "label": "reminders.create",
+      "iters": 50,
+      "p50_ms": 3.177,
+      "p99_ms": 13.239,
+      "budget_p99_ms": 150,
+      "passed": true
+    },
+    {
+      "phase": 22,
+      "label": "versions.list-25",
+      "iters": 50,
+      "p50_ms": 4.686,
+      "p99_ms": 16.306,
+      "budget_p99_ms": 150,
+      "passed": true
+    }
+  ]
+}

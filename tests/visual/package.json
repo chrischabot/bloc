@@ -1,0 +1,14 @@
+{
+  "name": "@bloc/tests-visual",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test:visual": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.49.1",
+    "typescript": "5.6.3"
+  }
+}

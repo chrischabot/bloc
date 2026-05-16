@@ -1,0 +1,19 @@
+{
+  "label": "phase-4.databases.query-100rows-2clause",
+  "ts": "2026-05-15T23:25:25.658Z",
+  "iters": 50,
+  "p50_ms": 58.649,
+  "p90_ms": 69.172,
+  "p99_ms": 90.76,
+  "max_ms": 90.76,
+  "errors": 0,
+  "budget_p99_ms": 250,
+  "passed": true,
+  "host": {
+    "hostname": "ip-10-0-40-14.ec2.internal",
+    "cpu_model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+    "cpu_count": 2,
+    "ram_gb": 8,
+    "node": "v22.19.0"
+  }
+}
