@@ -117,15 +117,18 @@ The `tests/sdk-progressive/` suite enforces this compatibility — every endpoin
 
 ## Documentation
 
-The full specification suite lives under [`docs/`](./docs/):
+User- and developer-facing docs live under [`docs/`](./docs/); the original build specification suite (north-star plan, per-phase deliverables, pixel-perfect checklists) is under [`specs/`](./specs/).
 
-- [`docs/README.md`](./docs/README.md) — north star, scoping, definition of done
-- [`docs/INDEX.md`](./docs/INDEX.md) — navigable index of every spec
-- [`docs/architecture/`](./docs/architecture/) — tech stack, data model, storage, realtime, auth, observability, security
-- [`docs/api/`](./docs/api/) — REST contract: every endpoint, every schema, every operator
-- [`docs/frontend/`](./docs/frontend/) — UI specification: design system, editor, every block, every view
-- [`docs/testing/`](./docs/testing/) — testing strategy and budgets
-- [`docs/observability/`](./docs/observability/) — tracing, logging, metrics
+- [`docs/`](./docs/README.md) — start here
+- [`docs/platform/`](./docs/platform/README.md) — overview, architecture, data model, auth, realtime, Notion compatibility
+- [`docs/self-hosting/`](./docs/self-hosting/README.md) — install, configure, run the servers, scale, back up, upgrade
+- [`docs/api/`](./docs/api/README.md) — full REST reference: every endpoint, every schema, every operator
+- [`docs/sdk/`](./docs/sdk/README.md) — `@bloc/sdk` reference: every namespace, function, parameter, type
+- [`docs/reporting/`](./docs/reporting/README.md) — logs, metrics, traces, analytics, audit, dashboards, alerts
+- [`docs/web/`](./docs/web/README.md) — web dashboard guide: editor, databases, sharing, search, AI, settings
+- [`docs/apps/`](./docs/apps/README.md) — surface-specific guides: automations, forms, charts, sites, calendar, mail, wikis, AI agent, connections, imports/exports
+- [`docs/guides/`](./docs/guides/README.md) — task-oriented walkthroughs: quickstart, first API call, integrations, migration, production deployment, custom blocks, webhook receivers, `react-notion-x`, bulk imports, pitfalls
+- [`specs/`](./specs/) — the original build specification suite
 
 ## Repository layout
 

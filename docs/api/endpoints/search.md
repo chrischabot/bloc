@@ -1,46 +1,34 @@
-# Search Endpoint
+# Search
 
-## `POST /v1/search`
+`POST /v1/search`
 
-Full-text search the workspace.
-
-**Body**:
-
-```jsonc
+```json
 {
-  "query": "string",
-  "sort": { "direction": "ascending"|"descending", "timestamp": "last_edited_time" },
+  "query": "Hello",
   "filter": { "value": "page" | "database", "property": "object" },
-  "start_cursor": "...",
-  "page_size": 100
+  "sort":   { "direction": "ascending" | "descending", "timestamp": "last_edited_time" },
+  "page_size": 50,
+  "start_cursor": "..."
 }
 ```
 
-All fields optional. Empty `query` returns recently edited objects.
+All fields optional. Empty query returns recent pages and databases (ordered by `last_edited_time desc` by default).
 
-**Response** (200):
+Response:
 
-```jsonc
+```json
 {
   "object": "list",
   "type": "page_or_database",
-  "results": [ /* Page or Database objects */ ],
-  "next_cursor": "...|null",
-  "has_more": true|false,
-  "page_or_database": {}
+  "results": [ /* mixed PageObject and DatabaseObject */ ],
+  "next_cursor": "..." | null,
+  "has_more": true | false
 }
 ```
 
-## Semantics
+## Notes
 
-- Search index: MeiliSearch with documents per page (`title`, `text` derived from blocks), per database (`title`, `description`).
-- Server-side ACL filter applied to every result; results the caller cannot read are removed (and `has_more` may indicate further results).
-- Typo-tolerance: 1 typo per word ≤ 4 chars, 2 typos for longer words. Configured in MeiliSearch.
-- Ranking: token-position + recency boost (last_edited_time half-life 30d).
-
-## Test obligations
-
-- Contract: results match Notion's ordering rules (recency for empty query, relevance for non-empty).
-- SDK-progressive: `client.search`.
-- Chaos: extremely long queries (10k chars), regex-y queries, queries with control chars — all 200 (sanitised) or 400 (over length).
-- Latency: indexer lag asserted ≤ 5s after write.
+- Search is backed by MeiliSearch. There's a small replication lag (typically < 5 s) between a write and its appearance in search results.
+- Search results respect the caller's ACL — pages they can't read won't appear.
+- The `query` is matched against title, body text, and database property values configured as searchable.
+- See [Reporting › Metrics](../../reporting/03-metrics.md) for `search_index_lag_seconds`.

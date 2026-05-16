@@ -1,77 +1,61 @@
-# Sites & Publishing Endpoints
+# Sites publishing
 
-See `docs/frontend/19-sites-publishing.md`.
+Make a page (or a tree of pages) publicly visitable on the web with optional custom domain.
 
-## `GET /v1/pages/{page_id}/publication`
+## Publish a page
 
-Retrieve the current publication state.
+`POST /v1/pages/{page_id}/publish`
 
-**Response** (200):
-```jsonc
+```json
 {
-  "object": "publication",
-  "page_id": "uuid",
-  "state": "live" | "draft" | "expired",
-  "url": "https://workspace.notion.site/<slug>-<hash>",
-  "custom_domain": null | "docs.example.com",
-  "allow_edit": false,
-  "allow_comment": true,
-  "allow_duplicate": false,
-  "index_in_search": true,
-  "show_toc": true,
-  "show_navbar": true,
-  "expires_at": null,
-  "created_at": "...",
-  "updated_at": "..."
+  "include_subpages": true,
+  "navigation": "sidebar" | "breadcrumbs" | "none",
+  "theme":      "light" | "dark" | "auto",
+  "search":     true,
+  "indexable":  true
 }
 ```
 
-## `POST /v1/pages/{page_id}/publication`
+Response:
 
-Publish (or republish). Body uses the same shape as response, omitting derived fields. Returns the updated publication.
+```json
+{
+  "object": "site_publication",
+  "id": "uuid",
+  "page_id": "uuid",
+  "public_url": "https://<host>/sites/<slug>",
+  "options": { ... },
+  "status": "active",
+  "published_at": "..."
+}
+```
 
-## `DELETE /v1/pages/{page_id}/publication`
+## Unpublish
 
-Unpublish (204).
+`DELETE /v1/pages/{page_id}/publish`
+
+## Retrieve a publication
+
+`GET /v1/pages/{page_id}/publish`
+
+## Public read
+
+`GET /v1/sites/{slug}` — no auth. Returns the page's `recordMap` for the publisher's renderer.
+
+`GET /v1/sites/{slug}/{sub_slug}` — read sub-page when `include_subpages: true`.
 
 ## Custom domains
 
-### `GET /v1/workspaces/{id}/custom_domains`
+`POST /v1/workspaces/me/custom-domains`
 
-List custom domains for the workspace.
-
-### `POST /v1/workspaces/{id}/custom_domains`
-
-```jsonc
-{ "domain": "docs.example.com", "page_id": "uuid" }
+```json
+{ "publication_id": "uuid", "domain": "docs.example.com" }
 ```
 
-Response includes `dns_records` to be set at the registrar and `status: "pending"`.
+Bloc generates DNS records; verify with `POST /v1/workspaces/me/custom-domains/{id}/verify`. Once verified, the publication serves at `https://docs.example.com`.
 
-### `GET /v1/workspaces/{id}/custom_domains/{domain_id}`
+## Notes
 
-Returns the current status (`pending`, `provisioning`, `live`, `failed`) and TLS certificate status.
-
-### `DELETE /v1/workspaces/{id}/custom_domains/{domain_id}`
-
-Remove the binding; the page reverts to the `notion.site` URL.
-
-## Auth / permissions
-
-- Publish / unpublish: requires `full_access` on the page **and** workspace owner / admin role (configurable per workspace policy).
-- Custom domains: workspace owner only.
-
-## Errors
-
-| HTTP | Code |
-|------|------|
-| 400 | `invalid_request` (invalid domain shape, public URL in body) |
-| 402 | `restricted_resource` (custom domain requires paid plan) |
-| 409 | `conflict_error` (domain already bound to another workspace) |
-| 422 | `unprocessable_entity` (DNS not yet propagated) |
-
-## Tests
-
-- E2E: publish a page, hit the public URL anonymously, assert HTML + correct CSP.
-- Chaos: domain pointing at a private IP, infinite CNAME, expired TLS — handled with `failed` status, surfaced to the user.
-- Observability: `publication.created/updated/deleted` spans + audit events.
+- Public sites are anonymous-accessible. ACL still applies for any *non-published* pages they link to — those return 404 to anonymous visitors.
+- Sites are indexed by search engines unless `indexable: false`.
+- Traffic to `/v1/sites/*` doesn't require a bearer; it does count toward IP-based rate limits.

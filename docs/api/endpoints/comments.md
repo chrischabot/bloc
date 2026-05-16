@@ -1,62 +1,54 @@
-# Comments Endpoints
+# Comments
 
-## `POST /v1/comments`
+Endpoints under `/v1/comments`.
 
-Create a comment. Two modes:
+## Create a comment
 
-**On a page** (creates a new discussion):
+`POST /v1/comments`
 
-```jsonc
+Two shapes:
+
+**Start a new discussion on a page or block:**
+
+```json
 {
-  "parent": { "page_id": "uuid" },
-  "rich_text": [ /* RichText[] */ ]
+  "parent": { "page_id": "uuid" }   // or { "block_id": "uuid" }
+  "rich_text": [ { "type": "text", "text": { "content": "..." } } ]
 }
 ```
 
-**On an existing discussion** (reply):
+**Reply to an existing discussion:**
 
-```jsonc
-{
-  "discussion_id": "uuid",
-  "rich_text": [...]
-}
+```json
+{ "discussion_id": "uuid", "rich_text": [ ... ] }
 ```
 
-**Response** (200):
+## List comments
 
-```jsonc
-{
-  "object": "comment",
-  "id": "uuid",
-  "parent": { "type":"page_id"|"block_id", ... },
-  "discussion_id": "uuid",
-  "created_time": "...",
-  "last_edited_time": "...",
-  "created_by": { "object":"user","id":"..." },
-  "rich_text": [...]
-}
+`GET /v1/comments?page_id={uuid}` or `?block_id={uuid}`
+
+Returns comments on that target (any discussion), paginated.
+
+## Reactions
+
+`POST   /v1/comments/{comment_id}/reactions`
+
+```json
+{ "emoji": "👍" }
 ```
 
-## `GET /v1/comments`
+`DELETE /v1/comments/{comment_id}/reactions/{emoji}` (URL-encode the emoji)
 
-List open comments on a page or block.
+The response is the updated comment with the `reactions` array.
 
-**Query**:
-- Exactly one resource selector (required):
-  - `block_id=<uuid>` — comments anchored to a block (including the page's root block, i.e. the page itself)
-  - `page_id=<uuid>` — equivalent to `block_id` for the page's root; supported for ergonomic parity with `/v1/pages`
-- Pagination (optional): `start_cursor`, `page_size`
+## Resolve a discussion
 
-Omitting both selectors returns 400 `invalid_request`. Providing both returns 400.
+`POST /v1/comments/{comment_id}/resolve`
 
-**Response** (200):
+Returns:
 
-```jsonc
-{ "object":"list", "type":"comment", "results":[ /* Comment[] */ ], "next_cursor":"...|null", "has_more":..., "comment":{} }
+```json
+{ "object": "discussion", "id": "uuid", "resolved": true }
 ```
 
-## Test obligations
-
-- Contract: create on page, reply, list, paginate.
-- SDK-progressive: `client.comments.create`, `.list`.
-- Chaos: comment on resource without comment permission → 403/404; oversized rich_text → 400; XSS in URL/href → sanitised.
+Resolving a discussion does not delete its comments; it hides them by default in the UI.

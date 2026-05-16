@@ -1,126 +1,112 @@
-# AI Endpoints
+# AI
 
-See `docs/frontend/18-ai.md`.
+Endpoints under `/v1/ai`. Required scope: `ai`.
 
-## `POST /v1/ai/completions`
+These endpoints proxy to the configured LLM provider (`AI_PROVIDER` env). With `AI_PROVIDER=stub`, responses are deterministic — useful in tests.
 
-Streaming completion (Server-Sent Events).
+## Completions
 
-**Body**:
-```jsonc
+`POST /v1/ai/completions`
+
+```json
 {
   "surface": "writer" | "ai_block" | "agent" | "autofill" | "qa",
-  "model": "default" | "fast" | "advanced",
+  "model":   "default" | "fast" | "advanced",
   "messages": [
-    { "role": "system", "content": "You are…" },
-    { "role": "user",   "content": "..." }
+    { "role": "system" | "user" | "assistant" | "tool", "content": "...", "name": "..." }
   ],
-  "context_pages": ["<page-id>"],   // optional grounding; ACL-checked
-  "stream": true
+  "context_pages": [ "uuid", "uuid" ],
+  "block_id": "uuid"
 }
 ```
 
-**Response**: SSE stream with events:
-- `data: {"type":"token","value":"Hel"}`
-- `data: {"type":"token","value":"lo"}`
-- `data: {"type":"source","page_id":"...","snippet":"..."}` (for Q&A and grounded calls)
-- `data: {"type":"end","run_id":"...","tokens_in":52,"tokens_out":118}`
+`surface` and `model` are optional (default `writer` / `default`). When `block_id` is set **and** `surface == 'ai_block'`, the completion is persisted into the named block.
 
-Errors stream as `data: {"type":"error","code":"...","message":"..."}` followed by stream close.
+Response:
 
-## `POST /v1/ai/qa`
+```json
+{
+  "object": "ai_completion",
+  "surface": "writer",
+  "model": "default",
+  "text": "...",
+  "tokens_in": 312,
+  "tokens_out": 187,
+  "citations": [ { "pageId": "uuid", "snippet": "...", "score": 0.81 } ]
+}
+```
 
-Synchronous Q&A.
+## Q&A
 
-**Body**: `{ "query": "...", "filter": { "object": "page|database", ... } }`.
+`POST /v1/ai/qa`
 
-**Response**:
-```jsonc
+```json
+{ "query": "Where are the Q3 OKRs?", "filter": { "object": "page" | "database" } }
+```
+
+Returns:
+
+```json
 {
   "object": "ai_answer",
-  "answer": "Plain or markdown answer.",
-  "sources": [
-    { "page_id": "uuid", "snippet": "...", "score": 0.87 }
-  ],
-  "run_id": "..."
+  "answer": "...",
+  "sources": [ { "page_id": "uuid", "snippet": "...", "score": 0.91 } ]
 }
 ```
+
+The retrieval window is scoped to pages the caller can read. Answers are cached per `(workspace, query, index_version)` for 1 h.
+
+## Autofill
+
+`POST /v1/ai/autofill/run`
+
+Fill one property on one page. Used by the Autofill surface in the UI.
+
+```json
+{ "page_id": "uuid", "property_id": "...", "instructions": "..." }
+```
+
+Returns the updated `PropertyItem`.
 
 ## Agent
 
-### `POST /v1/ai/agent/tasks`
+`POST /v1/ai/agent`
 
-Create a new task or continue an existing one.
+Runs a tool-using agent against the workspace until it answers or hits `max_iterations`.
 
-**Body**:
-```jsonc
+```json
 {
-  "task_id": "uuid|null",         // null to create
-  "user_message": "Plan a launch for the new feature.",
-  "allowed_tools": ["pages.search","pages.create","blocks.append","databases.query","comments.create"]
+  "goal": "Summarise the latest 5 engineering meeting notes",
+  "max_iterations": 10,
+  "context_pages": [ "uuid" ]
 }
 ```
 
-**Response** (streamed SSE):
-- `data: {"type":"assistant_message","content":"..."}`
-- `data: {"type":"tool_call","name":"pages.search","input":{...},"call_id":"..."}`
-- `data: {"type":"tool_result","call_id":"...","output":{...}}`
-- `data: {"type":"end","task_id":"..."}`
+Response:
 
-### `GET /v1/ai/agent/tasks/{task_id}`
-
-Retrieve task state + history.
-
-### `POST /v1/ai/agent/tasks/{task_id}:cancel`
-
-Cancels a running task.
-
-## `POST /v1/ai/autofill/run`
-
-Run autofill on a specific page property.
-
-**Body**: `{ "page_id":"uuid", "property_id":"uuid" }`.
-
-**Response**: `{ "object":"property_item", ... }` (the updated value).
-
-## Meeting Notes
-
-### `POST /v1/ai/meeting-notes`
-
-Multipart: an audio file + JSON metadata. Returns a job:
-```jsonc
-{ "object":"meeting_notes_job", "id":"uuid", "page_id":"uuid", "status":"processing" }
-```
-
-### `GET /v1/ai/meeting-notes/{job_id}`
-
-```jsonc
+```json
 {
-  "object":"meeting_notes_job",
-  "id":"uuid",
-  "status":"processing|complete|failed",
-  "page_id":"uuid",
-  "duration_s":1320,
-  "progress":0.6
+  "object": "agent_run",
+  "task_id": "uuid",
+  "status": "success" | "partial" | "failed",
+  "goal": "...",
+  "message": "Final answer text",
+  "steps": [
+    {
+      "index": 0,
+      "type": "tool_call" | "llm",
+      "tool": "search_pages",
+      "input": { "query": "..." },
+      "output": { ... },
+      "status": "success" | "failed",
+      "duration_ms": 312
+    }
+  ]
 }
 ```
 
-When complete, the referenced page contains the rendered Meeting Notes layout (sections: Summary, Key points, Action items, Decisions, Transcript).
+Agent runs are long; expect 5–30 s. The endpoint streams nothing — wait for the response.
 
-## Errors
+## Rate limits
 
-| HTTP | Code |
-|------|------|
-| 400 | `invalid_request` (unknown surface, bad model) |
-| 402 | `restricted_resource` (plan does not include this AI surface) |
-| 403 | `restricted_resource` (Q&A context page not readable) |
-| 409 | `conflict_error` (cancelled task continued) |
-| 422 | `unprocessable_entity` (audio decode failed) |
-| 429 | `rate_limited` (AI quota exhausted) |
-
-## Test obligations
-
-- Contract: each surface's request/response shape; SSE framing.
-- Chaos: 10 MB prompts (truncated to 200 KB and warned), audio of 0 bytes / wrong codec / 5h (>4h cap → 413), Q&A query with non-readable context page → 403.
-- Observability: every call produces an `ai.<surface>` span + an `ai_runs` row; SSE close on cancel emits a `client_canceled` log.
-- Benchmark: Q&A p99 first-token < 800ms; autofill p99 end-to-end < 4s for a typical row.
+The AI endpoints share a tighter bucket (6 burst, 1 sustained/s, 60 s window). See [Rate limiting](../05-rate-limiting.md).

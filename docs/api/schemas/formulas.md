@@ -1,62 +1,74 @@
-# Formula Grammar
+# Formulas
 
-Mirrors Notion's Formula 2.0.
+Bloc's formula language is a faithful implementation of Notion's. Formula expressions are stored on the property schema as `formula.expression` (a string) and evaluated per row.
 
-## Top-level
+## Types
 
-A formula is a single expression that evaluates to a value of type `string`, `number`, `boolean`, or `date` (Notion's exposed Formula type union).
+A formula evaluates to one of four types:
 
-## Lexical grammar
+- `string`
+- `number`
+- `boolean`
+- `date`
 
-- Identifiers: `prop("Name")` is the canonical accessor for a property.
-- Literals: numeric (`42`, `3.14`, `1e3`), string (`"text"` — double quotes only), boolean (`true`, `false`), date via `dateBetween` or function literal.
-- Comments: `//` to end of line.
+Bloc infers the result type from the expression; the inferred type is exposed on the schema as `formula.type`.
+
+## Literals
+
+| Form | Type |
+|---|---|
+| `"hello"` | string |
+| `42` | number |
+| `3.14` | number |
+| `true`, `false` | boolean |
+| `now()`, `start(prop("Date"))` | date |
+
+## Property reference
+
+```
+prop("Name")
+```
+
+Quotes are required. Property names are case-sensitive.
 
 ## Operators
 
-Arithmetic: `+`, `-`, `*`, `/`, `%`, `^`
-Comparison: `==`, `!=`, `<`, `<=`, `>`, `>=`
-Logical: `and`, `or`, `not`
-Ternary: `condition ? a : b`
-String concat: `+` between strings (implicit coercion via `format()`).
+| Operator | Result | Example |
+|---|---|---|
+| `+`, `-`, `*`, `/`, `%`, `^` | number | `prop("Score") * 2` |
+| `==`, `!=`, `<`, `<=`, `>`, `>=` | boolean | `prop("Status") == "Done"` |
+| `and`, `or`, `not` | boolean | `prop("A") and not prop("B")` |
+| `?:` (ternary) | any | `prop("A") > 10 ? "high" : "low"` |
 
 ## Functions
 
-### Arithmetic
-`abs(n)`, `ceil(n)`, `floor(n)`, `round(n)`, `sign(n)`, `sqrt(n)`, `cbrt(n)`, `log10(n)`, `ln(n)`, `exp(n)`, `pow(a,b)`, `max(...n)`, `min(...n)`, `mod(a,b)`
+A selection — full set follows Notion's reference at `developers.notion.com/reference/formulas`:
 
-### String
-`length(s)`, `substring(s, start, end?)`, `concat(...s)`, `format(value)`, `replace(s, pat, rep)`, `replaceAll(s, pat, rep)`, `contains(s, sub)`, `test(s, regex)`, `match(s, regex)`, `slice(s, a, b?)`, `lower(s)`, `upper(s)`
+| Function | Returns |
+|---|---|
+| `if(c, a, b)` | depends on a/b |
+| `concat(a, b, ...)` | string |
+| `replace(s, pat, rep)` | string |
+| `replaceAll(s, pat, rep)` | string |
+| `length(s)` | number |
+| `slice(s, start, end?)` | string |
+| `format(n)` | string |
+| `toNumber(s)` | number |
+| `abs(n)`, `round(n)`, `ceil(n)`, `floor(n)`, `sign(n)`, `sqrt(n)`, `exp(n)`, `log10(n)`, `ln(n)` | number |
+| `min(a, b, …)`, `max(a, b, …)` | number |
+| `now()`, `start(d)`, `end(d)` | date |
+| `year(d)`, `month(d)`, `day(d)`, `hour(d)`, `minute(d)` | number |
+| `date(d)`, `dateAdd(d, n, "days")` | date |
+| `dateBetween(a, b, "days")` | number |
+| `formatDate(d, "YYYY-MM-DD")` | string |
+| `empty(x)`, `isBlank(x)` | boolean |
 
-### Boolean
-`if(cond, a, b)`, `and(...b)`, `or(...b)`, `not(b)`, `empty(v)`
+## Errors
 
-### Date
-`now()`, `today()`
-`date(year, month, day)`, `dateBetween(a, b, unit)` where unit is `"years"|"months"|"weeks"|"days"|"hours"|"minutes"|"seconds"|"milliseconds"`
-`dateAdd(d, n, unit)`, `dateSubtract(d, n, unit)`, `dateRange(start, end)`
-`formatDate(d, fmt)`, `start(range)`, `end(range)`
-`year(d)`, `month(d)`, `day(d)`, `hour(d)`, `minute(d)`, `second(d)`, `timestamp(d)`, `fromTimestamp(ms)`
+Invalid expressions are rejected on schema update with `validation_error` and a `details[].issue` describing the parse position. Runtime errors (divide-by-zero on a per-row basis) evaluate to the type's empty value (`""`, `0`, `false`, or unset date).
 
-### List / array (rollup return)
-`length(arr)`, `at(arr, i)`, `first(arr)`, `last(arr)`, `slice(arr, a, b?)`, `map(arr, fn)`, `filter(arr, fn)`, `find(arr, fn)`, `every(arr, fn)`, `some(arr, fn)`, `unique(arr)`, `sort(arr)`, `reverse(arr)`, `flat(arr)`, `sum(arr)`, `mean(arr)`, `median(arr)`, `min(arr)`, `max(arr)`
+## Limits
 
-### Type
-`type(v)` → `"string"|"number"|"boolean"|"date"|"list"`
-
-## `prop(name)`
-
-Returns the property value of the page evaluated. For non-scalar properties (`relation`, `rollup`, `people`, `files`, `multi_select`), returns the structured list; functions like `length`, `at`, `map` are appropriate.
-
-## Evaluation semantics
-
-- Eager evaluation.
-- Type coercion: explicit only — use `format()` to stringify numbers/dates.
-- Errors during eval (divide-by-zero, type mismatch) produce a `formula.type = "string"` value with the value `""` and surface an `evaluation_error` annotation in the property item retrieve endpoint.
-
-## Compilation
-
-- Parser: PEG grammar in `packages/db/src/formula/parser.ts`.
-- Compiler: AST → typed IR with type inference; rejects expressions whose top-level type is ambiguous (400 at database-property-create time).
-- Executor: stateless evaluator in `packages/db/src/formula/eval.ts`.
-- Tests: golden suite of ≥ 200 expressions covering every function, including failure modes.
+- Maximum expression length: 8 KB.
+- Maximum AST depth: 32.
+- Functions referenced must be in the catalogue; user-defined functions are not supported.

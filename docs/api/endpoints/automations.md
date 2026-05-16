@@ -1,111 +1,109 @@
-# Buttons & Automations Endpoints
+# Automations & buttons
 
-See `docs/frontend/20-buttons-automations.md` for product behaviour. Action schemas are in `docs/api/schemas/automation-actions.md`.
+Automations are per-database triggers; buttons are blocks that fire an automation on click.
 
-## Buttons
+## Automations
 
-### `POST /v1/buttons/{block_id}/invoke`
+### List
 
-Fire a button. Returns the per-step run log.
+`GET /v1/databases/{database_id}/automations`
 
-**Body** (optional):
-```jsonc
-{ "context": { "<var>": <any> } }   // injected into the variable bag
-```
+### Create
 
-**Response** (200):
-```jsonc
+`POST /v1/databases/{database_id}/automations`
+
+```json
 {
-  "object": "automation_run",
-  "id": "uuid",
-  "button_block_id": "uuid",
-  "status": "success" | "partial" | "failed",
+  "name": "Notify on stage change",
+  "trigger": {
+    "type": "page_property_changed",
+    "property": "Status",
+    "to": "Done"
+  },
   "steps": [
-    { "index": 0, "type": "add_page_to_database", "status": "success", "duration_ms": 31, "output": { "page_id": "..." } }
+    { "type": "send_webhook", "url": "..." },
+    { "type": "update_property", "property": "Done at", "value": { "date": { "start": "now()" } } }
   ],
-  "started_at": "...",
-  "ended_at": "..."
-}
-```
-
-**Errors**: 401, 403 (no permission on a step's target), 422 (step misconfigured), 429.
-
-### Reading the button config
-
-Buttons live inside a block. Use `GET /v1/blocks/:id` and inspect the `button` payload. To edit, `PATCH /v1/blocks/:id` with a new `button` payload.
-
-## Database automations
-
-### `GET /v1/databases/{database_id}/automations`
-
-List automations on a database.
-
-**Response** (200):
-```jsonc
-{
-  "object": "list", "type": "automation",
-  "results": [
-    {
-      "object": "automation",
-      "id": "uuid",
-      "database_id": "uuid",
-      "name": "Notify on done",
-      "enabled": true,
-      "trigger": { "kind": "page_property_changed", "property_id": "...", "to": { "status": { "equals": "Done" } } },
-      "steps": [ ... ],
-      "last_run_at": "...",
-      "runs_count": 142
-    }
-  ],
-  "next_cursor": null,
-  "has_more": false,
-  "automation": {}
-}
-```
-
-### `POST /v1/databases/{database_id}/automations`
-
-Create an automation.
-
-**Body**:
-```jsonc
-{
-  "name": "Notify on done",
-  "trigger": { "kind": "page_property_changed", "property_id": "...", "to": { ... } },
-  "steps": [ { "type": "send_slack_message", "channel": "#proj", "body": "{{page.title}} is done." } ],
   "enabled": true
 }
 ```
 
-**Response** (200): the created `automation` object.
+Response:
 
-### `PATCH /v1/automations/{id}`
+```json
+{
+  "object": "automation",
+  "id": "uuid",
+  "database_id": "uuid",
+  "name": "...",
+  "enabled": true,
+  "trigger": { ... },
+  "steps": [ ... ],
+  "last_run_at": null,
+  "runs_count": 0,
+  "created_time": "...",
+  "last_edited_time": "..."
+}
+```
 
-Partial update.
+### Update
 
-### `DELETE /v1/automations/{id}`
+`PATCH /v1/automations/{automation_id}`
 
-### `GET /v1/automations/{id}/runs`
+Patch any of `name`, `trigger`, `steps`, `enabled`.
 
-List paginated runs (newest first).
+### Delete
 
-### `POST /v1/automations/{id}/runs:test`
+`DELETE /v1/automations/{automation_id}` → `204`.
 
-Dry-run an automation against a sample page; returns the per-step log without applying side effects (writes are flagged `would_apply`).
+### Test
 
-## Triggers
+`POST /v1/automations/{automation_id}/runs:test`
 
-| `kind` | Extra fields |
-|--------|--------------|
-| `page_added` | none |
-| `page_property_changed` | `property_id`, optional `to` filter (any operator from `docs/api/schemas/filters.md`) |
-| `page_property_meets` | `property_id`, `condition` (filter operator) |
-| `time` | `cron` (5-field UTC), optional `timezone` |
+```json
+{ "sample_page_id": "uuid", "context": { ... } }
+```
 
-## Test obligations
+Returns an `automation_run` describing what each step did without persisting effects against `runs_count`. Useful before enabling.
 
-- Contract per step and per trigger.
-- SDK-progressive: `client.automations.list/create/update/delete/test`, `client.buttons.invoke`.
-- Chaos: oversized step counts (>50), templating injection (`{{__proto__}}`), action targeting forbidden resource (403), invalid cron, cycle-induced infinite loops (cap recursion depth at 5).
-- Observability: every run produces a parent `automation.run` span with child `automation.step` spans tagged by step type + status.
-- Benchmark: 5-step button invoke p99 < 300ms; automation worker throughput ≥ 50 runs/s on a 2-core worker.
+## Buttons
+
+A button block lives inside a page and invokes a configured automation.
+
+### Invoke
+
+`POST /v1/buttons/{block_id}/invoke`
+
+```json
+{ "context": { /* arbitrary */ } }
+```
+
+Returns an `automation_run`.
+
+## Trigger types
+
+| Type | Fires when |
+|---|---|
+| `page_created` | New row in the database |
+| `page_property_changed` | Specified property changes (optionally to/from a value) |
+| `page_property_within_offset` | Property is within `offset` of `now()` (for date properties) |
+| `button_clicked` | Manual via button block |
+| `scheduled` | Cron-like `schedule: "0 9 * * *"` in workspace TZ |
+
+## Step types
+
+| Type | Notes |
+|---|---|
+| `update_property` | Sets a property on the trigger page (or `target_page_id`) |
+| `add_child_block` | Append blocks under a target page |
+| `send_webhook` | POST JSON to a URL |
+| `send_email` | SMTP with templated subject/body |
+| `create_page` | Create a row in another database |
+| `ai_completion` | Call `/v1/ai/completions` with a prompt template |
+| `wait` | `seconds: N` — useful for chained effects |
+
+Steps run sequentially; if one fails, subsequent steps with `on_error: "skip"` continue, otherwise the run is marked `failed`.
+
+## Run history
+
+Run history is currently retained on the `automations` table aggregate (`runs_count`, `last_run_at`). For per-run audit, use the audit log (`/v1/workspaces/me/audit?action=automation.ran`).
