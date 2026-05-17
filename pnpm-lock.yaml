@@ -29,21 +29,21 @@ importers:
 
   apps/api:
     dependencies:
+      '@bloc/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
+      '@bloc/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@bloc/observability':
+        specifier: workspace:*
+        version: link:../../packages/observability
+      '@bloc/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@hono/node-server':
         specifier: 1.13.7
         version: 1.13.7(hono@4.6.14)
-      '@notion/ai':
-        specifier: workspace:*
-        version: link:../../packages/ai
-      '@notion/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@notion/observability':
-        specifier: workspace:*
-        version: link:../../packages/observability
-      '@notion/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       drizzle-orm:
         specifier: 0.36.4
         version: 0.36.4(@electric-sql/pglite@0.4.5)(@opentelemetry/api@1.9.0)(@types/pg@8.6.1)(@types/react@19.0.4)(postgres@3.4.5)(react@19.0.0)
@@ -69,13 +69,13 @@ importers:
 
   apps/web:
     dependencies:
-      '@notion/sdk':
+      '@bloc/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@notion/shared':
+      '@bloc/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@notion/ui':
+      '@bloc/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -103,13 +103,13 @@ importers:
 
   apps/worker:
     dependencies:
-      '@notion/db':
+      '@bloc/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@notion/observability':
+      '@bloc/observability':
         specifier: workspace:*
         version: link:../../packages/observability
-      '@notion/shared':
+      '@bloc/shared':
         specifier: workspace:*
         version: link:../../packages/shared
     devDependencies:
@@ -125,7 +125,7 @@ importers:
 
   packages/ai:
     dependencies:
-      '@notion/shared':
+      '@bloc/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -138,12 +138,12 @@ importers:
 
   packages/db:
     dependencies:
+      '@bloc/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@electric-sql/pglite':
         specifier: 0.4.5
         version: 0.4.5
-      '@notion/shared':
-        specifier: workspace:*
-        version: link:../shared
       bcryptjs:
         specifier: 2.4.3
         version: 2.4.3
@@ -206,7 +206,7 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@notion/shared':
+      '@bloc/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -232,7 +232,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@notion/shared':
+      '@bloc/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:
@@ -245,10 +245,10 @@ importers:
 
   tests/chaos:
     dependencies:
-      '@notion/api':
+      '@bloc/api':
         specifier: workspace:*
         version: link:../../apps/api
-      '@notion/shared':
+      '@bloc/shared':
         specifier: workspace:*
         version: link:../../packages/shared
     devDependencies:
@@ -264,13 +264,13 @@ importers:
 
   tests/contract:
     dependencies:
-      '@notion/api':
+      '@bloc/api':
         specifier: workspace:*
         version: link:../../apps/api
-      '@notion/db':
+      '@bloc/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@notion/shared':
+      '@bloc/shared':
         specifier: workspace:*
         version: link:../../packages/shared
     devDependencies:
@@ -289,7 +289,7 @@ importers:
 
   tests/observability:
     dependencies:
-      '@notion/observability':
+      '@bloc/observability':
         specifier: workspace:*
         version: link:../../packages/observability
       '@opentelemetry/api':
@@ -308,16 +308,16 @@ importers:
 
   tests/sdk-progressive:
     dependencies:
-      '@notion/api':
+      '@bloc/api':
         specifier: workspace:*
         version: link:../../apps/api
-      '@notion/db':
+      '@bloc/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@notion/sdk':
+      '@bloc/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@notion/shared':
+      '@bloc/shared':
         specifier: workspace:*
         version: link:../../packages/shared
     devDependencies:
@@ -336,13 +336,13 @@ importers:
 
   tools/benchmark:
     dependencies:
-      '@notion/api':
+      '@bloc/api':
         specifier: workspace:*
         version: link:../../apps/api
-      '@notion/db':
+      '@bloc/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@notion/shared':
+      '@bloc/shared':
         specifier: workspace:*
         version: link:../../packages/shared
 

@@ -24,7 +24,7 @@ export default function DatabaseLauncher(): React.JSX.Element {
     const result = await client.search({
       query: '',
       filter: { value: 'database', property: 'object' },
-      page_size: 50,
+      page_size: 100,
     });
     setItems(
       result.results.map((row) => {

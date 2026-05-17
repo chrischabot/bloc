@@ -464,7 +464,8 @@ code {
 }
 .block--divider {
   border: none;
-  border-top: 1px solid var(--border-default);
+  height: 1px;
+  background: var(--border-default);
   margin: var(--space-4) 0;
 }
 .block--callout {
@@ -1725,10 +1726,10 @@ code {
 
 .reminders {
   position: fixed;
-  top: 0;
+  top: 48px;
   right: 0;
   width: 360px;
-  height: 100vh;
+  height: calc(100vh - 48px);
   background: var(--bg-primary);
   border-left: 1px solid var(--border-divider);
   display: flex;
@@ -1866,10 +1867,10 @@ code {
 
 .versions {
   position: fixed;
-  top: 0;
+  top: 48px;
   right: 0;
   width: 360px;
-  height: 100vh;
+  height: calc(100vh - 48px);
   background: var(--bg-primary);
   border-left: 1px solid var(--border-divider);
   display: flex;
@@ -2388,10 +2389,10 @@ code {
 
 .trash {
   position: fixed;
-  top: 0;
+  top: 48px;
   right: 0;
   width: 360px;
-  height: 100vh;
+  height: calc(100vh - 48px);
   background: var(--bg-primary);
   border-left: 1px solid var(--border-divider);
   display: flex;
@@ -2766,7 +2767,8 @@ code {
 }
 .editor-block--divider-wrap hr {
   border: none;
-  border-top: 1px solid var(--border-default);
+  height: 1px;
+  background: var(--border-default);
   margin: var(--space-4) 0;
 }
 .editor__add-block {

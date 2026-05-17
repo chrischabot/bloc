@@ -69,15 +69,15 @@ type AppVariables = {
 export type App = Hono<{ Variables: AppVariables }>;
 
 /** Path-conditional auth: returns true if the request must carry a bearer. */
-function requiresAuth(path: string): boolean {
+function requiresAuth(method: string, path: string): boolean {
   // Bootstrap, OAuth/email auth, public site reads, and public form submissions
   // are anonymous. Every other /v1 path requires auth.
   if (path === '/v1/bootstrap') return false;
   if (path.startsWith('/v1/auth/')) return false;
   if (path.startsWith('/v1/sites/')) return false;
-  // /v1/forms/:viewId/submissions is public. Other /v1/forms/* paths
-  // (CRUD on form views, list submissions) require auth.
-  if (/^\/v1\/forms\/[^/]+\/submissions$/.test(path)) return false;
+  // POST /v1/forms/:viewId/submissions is public. GET (workspace-scope list)
+  // and all other /v1/forms/* paths require auth.
+  if (method === 'POST' && /^\/v1\/forms\/[^/]+\/submissions$/.test(path)) return false;
   return path.startsWith('/v1/');
 }
 
@@ -132,7 +132,7 @@ export function createApp(deps: AppDeps): App {
     // Path-conditional auth middleware.
     const authMw = makeAuthMiddleware(deps.handle);
     app.use('/v1/*', async (c, next) => {
-      if (!requiresAuth(c.req.path)) return next();
+      if (!requiresAuth(c.req.method, c.req.path)) return next();
       return authMw(c, next);
     });
 

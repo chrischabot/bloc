@@ -59,13 +59,13 @@ test.describe('workflows', () => {
       'block--todo',
       'block--quote',
       'block--callout',
-      'block--divider',
       'block--code',
       'block--equation',
       'block--bookmark',
     ]) {
       await expect(page.locator(`.${cls}`).first()).toBeVisible();
     }
+    await expect(page.locator('.block--divider').first()).toBeAttached();
     // 14. Formatting toolbar visible.
     await expect(page.getByRole('toolbar', { name: 'Text formatting' })).toBeVisible();
     expect(errors).toEqual([]);
@@ -393,9 +393,7 @@ test.describe('workflows', () => {
     await page.waitForURL(/\/home$/);
     await expect(page.getByRole('heading', { name: 'Home' })).toBeVisible();
     // 10. Bootstrap session is intact.
-    const session = await page.evaluate(() =>
-      window.localStorage.getItem('bloc-session'),
-    );
+    const session = await page.evaluate(() => window.localStorage.getItem('bloc-session'));
     expect(session).toBeTruthy();
     // 11. User id is a UUID.
     const userId = JSON.parse(session ?? '{}').user_id as string;

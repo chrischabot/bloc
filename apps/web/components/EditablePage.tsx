@@ -46,6 +46,7 @@ export default function EditablePage({ pageId }: { pageId: string }): React.JSX.
   } | null>(null);
   const blockRefs = useRef<Map<string, HTMLElement | null>>(new Map());
   const pendingTextRef = useRef<Map<string, string>>(new Map());
+  const pendingTitleRef = useRef<string | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load page + blocks on mount.
@@ -101,6 +102,18 @@ export default function EditablePage({ pageId }: { pageId: string }): React.JSX.
   // Debounced sync of pending text changes back to the API.
   const flushPending = useCallback(async () => {
     if (client === null) return;
+    const pendingTitle = pendingTitleRef.current;
+    if (pendingTitle !== null) {
+      pendingTitleRef.current = null;
+      if (page !== null) {
+        try {
+          await client.pages.update({ page_id: page.id, title: pendingTitle });
+          window.dispatchEvent(new Event('bloc:sidebar:refresh'));
+        } catch {
+          // ignore
+        }
+      }
+    }
     const pending = pendingTextRef.current;
     if (pending.size === 0) return;
     const entries = Array.from(pending.entries());
@@ -120,7 +133,7 @@ export default function EditablePage({ pageId }: { pageId: string }): React.JSX.
         // Swallow — the UI keeps its optimistic state; user can retry.
       }
     }
-  }, [blocks, client]);
+  }, [blocks, client, page]);
 
   const scheduleFlush = useCallback(() => {
     if (debounceTimerRef.current !== null) {
@@ -276,8 +289,7 @@ export default function EditablePage({ pageId }: { pageId: string }): React.JSX.
       }
     };
     window.addEventListener('bloc:editor:change-type', handler as EventListener);
-    return () =>
-      window.removeEventListener('bloc:editor:change-type', handler as EventListener);
+    return () => window.removeEventListener('bloc:editor:change-type', handler as EventListener);
   }, [handleChangeType]);
 
   const handleSlash = useCallback((id: string, anchor: DOMRect | null) => {
@@ -321,17 +333,13 @@ export default function EditablePage({ pageId }: { pageId: string }): React.JSX.
   }, [blocks, client, handleInsertAfter]);
 
   const handleTitleChange = useCallback(
-    async (next: string) => {
-      if (page === null || client === null) return;
+    (next: string) => {
+      if (page === null) return;
       setPage({ ...page, title: next });
-      try {
-        await client.pages.update({ page_id: page.id, title: next });
-        window.dispatchEvent(new Event('bloc:sidebar:refresh'));
-      } catch {
-        // Silent failure; will retry on next change.
-      }
+      pendingTitleRef.current = next;
+      scheduleFlush();
     },
-    [page, client],
+    [page, scheduleFlush],
   );
 
   const archivePage = useCallback(async () => {
@@ -374,7 +382,7 @@ export default function EditablePage({ pageId }: { pageId: string }): React.JSX.
         <input
           className="editor__title-input"
           value={page.title}
-          onChange={(e) => void handleTitleChange(e.target.value)}
+          onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Untitled"
           aria-label="Page title"
           data-testid="page-title"

@@ -22,15 +22,22 @@ export async function createNewPage(page: Page): Promise<string> {
   await expect(page.locator('[data-testid=sidebar-new-page]')).toBeEnabled({
     timeout: BOOT_TIMEOUT,
   });
+  const beforeUrl = page.url();
   await page.locator('[data-testid=sidebar-new-page]').click();
-  await page.waitForURL(/\/page\/[0-9a-f-]+/, { timeout: ROUTE_TIMEOUT });
+  await page.waitForFunction(
+    (before: string) =>
+      /\/page\/[0-9a-f-]{36}(?:[/?#]|$)/.test(window.location.href) &&
+      window.location.href !== before,
+    beforeUrl,
+    { timeout: ROUTE_TIMEOUT },
+  );
   await expect(page.locator('[data-testid=editable-page]')).toBeVisible({
     timeout: BOOT_TIMEOUT,
   });
   // Wait for at least one block to render.
   await expect(page.locator('[data-block-id]').first()).toBeVisible({ timeout: BOOT_TIMEOUT });
-  const id = page.url().split('/page/')[1] ?? '';
-  return id;
+  const match = page.url().match(/\/page\/([0-9a-f-]{36})/);
+  return match?.[1] ?? '';
 }
 
 /** Open /database, click "+ New database", return the new id. */
@@ -40,12 +47,20 @@ export async function createNewDatabase(page: Page): Promise<string> {
     timeout: BOOT_TIMEOUT,
   });
   await expect(page.locator('[data-testid=database-new]')).toBeEnabled({ timeout: BOOT_TIMEOUT });
+  const beforeUrl = page.url();
   await page.locator('[data-testid=database-new]').click();
-  await page.waitForURL(/\/database\/[0-9a-f-]+/, { timeout: DB_CREATE_TIMEOUT });
+  await page.waitForFunction(
+    (before: string) =>
+      /\/database\/[0-9a-f-]{36}(?:[/?#]|$)/.test(window.location.href) &&
+      window.location.href !== before,
+    beforeUrl,
+    { timeout: DB_CREATE_TIMEOUT },
+  );
   await expect(page.locator('[data-testid=editable-database]')).toBeVisible({
     timeout: BOOT_TIMEOUT,
   });
-  return page.url().split('/database/')[1] ?? '';
+  const match = page.url().match(/\/database\/([0-9a-f-]{36})/);
+  return match?.[1] ?? '';
 }
 
 /** Get the contenteditable inside the Nth block row. */

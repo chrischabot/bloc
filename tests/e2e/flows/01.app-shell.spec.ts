@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { bootApp, failOnPageErrors, sidebar, uniqueSuffix } from './helpers.ts';
+import { bootApp, failOnPageErrors, sidebar } from './helpers.ts';
 
 test.describe('app shell', () => {
   test('1. workspace loads and bootstrap completes (≥10 steps)', async ({ page }) => {
@@ -28,10 +28,9 @@ test.describe('app shell', () => {
     }
     // 10. The bootstrap call wrote a session into localStorage.
     await expect
-      .poll(
-        () => page.evaluate(() => window.localStorage.getItem('bloc-session')),
-        { timeout: 15_000 },
-      )
+      .poll(() => page.evaluate(() => window.localStorage.getItem('bloc-session')), {
+        timeout: 15_000,
+      })
       .not.toBeNull();
     // 11. Welcome content is rendered in the main column (root redirects to /home).
     await expect(page.locator('main.content')).toContainText(/Home|Welcome|workspace/);
@@ -126,9 +125,7 @@ test.describe('app shell', () => {
     const flipped = await page.locator('html').getAttribute('data-theme');
     expect(flipped).not.toBe(initial);
     // 5. localStorage updated.
-    const stored = await page.evaluate(() =>
-      window.localStorage.getItem('bloc-theme'),
-    );
+    const stored = await page.evaluate(() => window.localStorage.getItem('bloc-theme'));
     expect(stored).toBe(flipped);
     // 6. Reload the page.
     await page.reload();
@@ -141,9 +138,7 @@ test.describe('app shell', () => {
     // 10. Original theme restored.
     await expect(page.locator('html')).toHaveAttribute('data-theme', initial ?? 'light');
     // 11. localStorage updated again.
-    const restored = await page.evaluate(() =>
-      window.localStorage.getItem('bloc-theme'),
-    );
+    const restored = await page.evaluate(() => window.localStorage.getItem('bloc-theme'));
     expect(restored).toBe(initial);
     // 12. Reload once more and confirm stable.
     await page.reload();
@@ -315,9 +310,7 @@ test.describe('app shell', () => {
     const errors = failOnPageErrors(page);
     await bootApp(page);
     // 1. Capture initial session.
-    const sessionA = await page.evaluate(() =>
-      window.localStorage.getItem('bloc-session'),
-    );
+    const sessionA = await page.evaluate(() => window.localStorage.getItem('bloc-session'));
     expect(sessionA).toBeTruthy();
     // 2. Read user id.
     const userIdA = JSON.parse(sessionA ?? '{}').user_id as string;
@@ -326,9 +319,7 @@ test.describe('app shell', () => {
     await page.reload();
     await expect(page.locator('[data-testid=sidebar-new-page]')).toBeEnabled({ timeout: 30_000 });
     // 4. Re-read session.
-    const sessionB = await page.evaluate(() =>
-      window.localStorage.getItem('bloc-session'),
-    );
+    const sessionB = await page.evaluate(() => window.localStorage.getItem('bloc-session'));
     const userIdB = JSON.parse(sessionB ?? '{}').user_id as string;
     // 5. User id stable.
     expect(userIdB).toBe(userIdA);
@@ -343,9 +334,7 @@ test.describe('app shell', () => {
     await page.goto('/settings');
     await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
     // 9. Session unchanged across nav.
-    const sessionC = await page.evaluate(() =>
-      window.localStorage.getItem('bloc-session'),
-    );
+    const sessionC = await page.evaluate(() => window.localStorage.getItem('bloc-session'));
     expect(sessionC).toBe(sessionB);
     // 10. Clear session.
     await page.evaluate(() => window.localStorage.removeItem('bloc-session'));
@@ -353,9 +342,7 @@ test.describe('app shell', () => {
     await page.reload();
     await expect(page.locator('[data-testid=sidebar-new-page]')).toBeEnabled({ timeout: 30_000 });
     // 12. Same user id after re-bootstrap.
-    const sessionD = await page.evaluate(() =>
-      window.localStorage.getItem('bloc-session'),
-    );
+    const sessionD = await page.evaluate(() => window.localStorage.getItem('bloc-session'));
     expect(JSON.parse(sessionD ?? '{}').user_id).toBe(userIdA);
     expect(errors).toEqual([]);
   });
@@ -363,7 +350,6 @@ test.describe('app shell', () => {
   test('10. inbox + reminders + trash panels open and close (≥10 steps)', async ({ page }) => {
     const errors = failOnPageErrors(page);
     await bootApp(page);
-    const _suffix = uniqueSuffix();
     // 1. Open Updates (inbox).
     await page.locator('.sidebar__quick').getByLabel('Inbox').click();
     // 2. Inbox panel visible — locate by its class to avoid collision with the

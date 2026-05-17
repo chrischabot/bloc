@@ -143,7 +143,9 @@ test.describe('sidebar panels', () => {
     // 11. Re-open and dismiss via scrim.
     await page.locator('.sidebar__footer').getByText('Templates').click();
     await expect(page.locator('section.templates')).toBeVisible();
-    await page.locator('.templates__scrim-dismiss').click();
+    await page.locator('.templates__scrim-dismiss').click({
+      position: { x: 10, y: 10 },
+    });
     // 12. Hidden after scrim dismiss.
     await expect(page.locator('section.templates')).toBeHidden();
     expect(errors).toEqual([]);
@@ -175,9 +177,9 @@ test.describe('sidebar panels', () => {
     await page.waitForTimeout(1100);
     await page.reload();
     await expect(page.locator('[data-testid=editable-page]')).toBeVisible({ timeout: 20_000 });
-    await expect(
-      page.locator('[data-testid=editor-body] [role=textbox]').first(),
-    ).toHaveText('Permission proof');
+    await expect(page.locator('[data-testid=editor-body] [role=textbox]').first()).toHaveText(
+      'Permission proof',
+    );
     expect(errors).toEqual([]);
   });
 
