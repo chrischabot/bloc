@@ -68,6 +68,10 @@ pnpm test:e2e    # Playwright, against a running web app and API
 
 `package.json` has the rest, including `test:sdk`, `test:chaos`, `test:obs` and the `bench:*` scenarios. Playwright needs a browser first: `pnpm --filter @bloc/tests-e2e exec playwright install chromium`.
 
+## Project background
+
+- [Bloc project overview](https://chabot.dev/projects/#bloc) on Chris Chabot’s site.
+
 ## License and credits
 
 Apache License 2.0; see [LICENSE](./LICENSE).
